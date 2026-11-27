@@ -1,0 +1,5 @@
+*.o
+logpulse
+loggen
+*.log
+*.csv
