@@ -42,3 +42,10 @@ typedef struct {
 } SharedMemoryData;
 
 #endif
+
+void metrics_shm_init(SharedMemoryData *shm, int num_workers);
+void metrics_shm_destroy(SharedMemoryData *shm);
+void metrics_worker_reset(WorkerMetrics *wm, pid_t pid, const char *filename, bool active);
+void metrics_record_entry(WorkerMetrics *wm, const LogEntry *entry);
+int metrics_top_items(const StatItem *items, int count, StatItem *out_top, int max_top);
+int metrics_export_csv(const SharedMemoryData *shm, const char *csv_path);
