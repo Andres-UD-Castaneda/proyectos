@@ -330,8 +330,8 @@ int run_worker_process(const WorkerConfig *cfg) {
     sync_metrics_to_shm(cfg->shm, cfg->worker_index, &local_acc, &start_ts, true, false);
     send_status_byte(cfg->status_pipe_fd, 'R');
 
-#ifdef MODE_LIVE
-    bool is_live = (cfg->mode == MODE_LIVE);
+#if 1
+    bool is_live = (cfg->mode == MODE_VIVO);
 #else
     bool is_live = (cfg->mode != 0);
 #endif

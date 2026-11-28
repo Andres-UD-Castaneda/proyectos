@@ -168,8 +168,8 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
     double avg_ms = (timed_count > 0) ? ((sum_time / (double)timed_count) * 1000.0) : 0.0;
     double rps = (max_elapsed > 0.001) ? ((double)tot_req / max_elapsed) : 0.0;
 
-#ifdef MODE_LIVE
-    const char *mode_label = (mode == MODE_LIVE) ? "EN VIVO" : "LOTE";
+#if 1
+    const char *mode_label = (mode == MODE_VIVO) ? "EN VIVO" : "LOTE";
 #else
     const char *mode_label = (mode != 0) ? "EN VIVO" : "LOTE";
 #endif
