@@ -90,8 +90,10 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
         return;
     }
 
-    SharedMemoryData snap;
-    memset(&snap, 0, sizeof(snap));
+    SharedMemoryData *snap = calloc(1, sizeof(SharedMemoryData));
+    if (!snap) {
+        return;
+    }
 
     SharedMemoryData *mshm = (SharedMemoryData *)shm;
     while (sem_wait(&mshm->mutex) != 0) {
@@ -99,7 +101,7 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
             break;
         }
     }
-    memcpy(&snap, shm, sizeof(snap));
+    memcpy(snap, shm, sizeof(*snap));
     sem_post(&mshm->mutex);
 
     uint64_t tot_req = 0, tot_mal = 0, tot_bytes = 0;
@@ -113,7 +115,7 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
     int all_url_n = 0;
     int all_ip_n = 0;
 
-    int n_workers = snap.num_workers;
+    int n_workers = snap->num_workers;
     if (n_workers < 0) {
         n_workers = 0;
     }
@@ -122,7 +124,7 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
     }
 
     for (int i = 0; i < n_workers; i++) {
-        const WorkerMetrics *wm = &snap.workers[i];
+        const WorkerMetrics *wm = &snap->workers[i];
         tot_req += wm->total_requests;
         tot_mal += wm->malformed_lines;
         tot_bytes += wm->bytes_transferred;
@@ -156,6 +158,7 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
 
     free(all_urls);
     free(all_ips);
+
 
     erase();
     int max_y = 0, max_x = 0;
@@ -204,7 +207,7 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
 
     int max_w_rows = (n_workers < 6) ? n_workers : 6;
     for (int i = 0; i < max_w_rows; i++) {
-        const WorkerMetrics *wm = &snap.workers[i];
+        const WorkerMetrics *wm = &snap->workers[i];
         const char *st_txt = wm->crashed ? "CRASH" : (wm->active ? "ACTIVO" : "LISTO");
         int pair_id = wm->crashed ? 4 : (wm->active ? 2 : 1);
         attron(COLOR_PAIR(pair_id));
@@ -218,6 +221,8 @@ void ui_render(const SharedMemoryData *shm, RunMode mode, bool paused, const cha
     }
 
     row++;
+    free(snap);
+    snap = NULL;
     int half_x = (max_x > 40) ? (max_x / 2) : 40;
 
     attron(A_BOLD);
